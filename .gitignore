@@ -1,0 +1,30 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# React build output
+build/
+
+# Environment variables
+.env
+
+# Logs
+logs
+*.log
+*.log.*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Optional: If you're using MySQL, database files might be in the project
+db/
+
+# Optional: If you are using Docker, you may want to ignore Docker-related files
+docker-compose.yml
+Dockerfile

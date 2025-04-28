@@ -1,0 +1,94 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  background-image: url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
+.auth-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-title {
+  color: #4a7c59;
+  text-align: center;
+  margin-top: 0;
+}
+
+.auth-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.auth-button {
+  background-color: #4a7c59;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.auth-button:hover {
+  background-color: #3d6649;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.auth-link a {
+  color: #4a7c59;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+.back-link {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.back-link a {
+  color: #666;
+}
