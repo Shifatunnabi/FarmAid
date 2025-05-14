@@ -1,4 +1,3 @@
-"use client"
 import "./Form.css"
 
 function Form({ title, fields, submitText, onSubmit }) {

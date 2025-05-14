@@ -3,63 +3,76 @@
 import { useState, useEffect } from "react"
 import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
+import ProfileButton from "../../components/ProfileButton"
+import { storeApi } from "../../utils/api"
+import { useAuth } from "../../context/AuthContext"
 
 function InstallmentRequests() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { user } = useAuth()
 
   useEffect(() => {
-    // In a real app, you would fetch data from an API
-    // For this example, we'll use mock data
-    setTimeout(() => {
-      setRequests([
-        {
-          id: 1,
-          title: "Organic Pesticide Package Request",
-          interest: 3,
-          description:
-            "I need eco-friendly pesticides for my organic vegetable farm. Looking for a 6-month installment plan.",
-          farmer: "Alice Cooper",
-          amount: 1200,
-        },
-        {
-          id: 2,
-          title: "Complete Pest Control Kit Request",
-          interest: 4.5,
-          description: "Requesting the comprehensive pest control solution for my wheat and corn fields.",
-          farmer: "John Doe",
-          amount: 2500,
-        },
-        {
-          id: 3,
-          title: "Fruit Tree Treatment Request",
-          interest: 3.5,
-          description:
-            "I need the specialized fruit tree treatment for my apple orchard. Prefer a 12-month installment plan.",
-          farmer: "Emma Wilson",
-          amount: 1800,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
-  }, [])
+    const fetchRequests = async () => {
+      try {
+        console.log(`Fetching pesticide requests for store ID: ${user.id}`)
+        const requestsData = await storeApi.getPesticideRequests(user.id)
+        console.log("Pesticide requests data received:", requestsData)
+        setRequests(requestsData)
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching pesticide requests:", err)
+        setError("Failed to load pesticide requests. Please try again later.")
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const handleApprove = (id) => {
-    alert(`Installment request #${id} has been approved. In a real app, this would update the database.`)
-    // In a real app, you would update the database and refresh the list
-    setRequests(requests.filter((request) => request.id !== id))
+    if (user && user.id) {
+      fetchRequests()
+    }
+  }, [user])
+
+  const handleApprove = async (id) => {
+    try {
+      console.log(`Approving pesticide request #${id}`)
+      await storeApi.acceptPesticideRequest(id)
+
+      // Remove the approved request from the list
+      setRequests(requests.filter((request) => request.id !== id))
+      alert("Pesticide installment request approved successfully!")
+    } catch (error) {
+      console.error("Error approving pesticide request:", error)
+      alert(`Failed to approve request: ${error.message || "Unknown error"}`)
+    }
   }
 
-  const handleReject = (id) => {
-    alert(`Installment request #${id} has been rejected. In a real app, this would update the database.`)
-    // In a real app, you would update the database and refresh the list
-    setRequests(requests.filter((request) => request.id !== id))
+  const handleReject = async (id) => {
+    try {
+      console.log(`Rejecting pesticide request #${id}`)
+      await storeApi.rejectPesticideRequest(id)
+
+      // Remove the rejected request from the list
+      setRequests(requests.filter((request) => request.id !== id))
+      alert("Pesticide installment request rejected successfully.")
+    } catch (error) {
+      console.error("Error rejecting pesticide request:", error)
+      alert(`Failed to reject request: ${error.message || "Unknown error"}`)
+    }
   }
 
   return (
-    <PageLayout title="Pesticide Installment Requests" backPath="/dashboard/store">
+    <PageLayout title="Pesticide Installment Requests" backPath="/dashboard/pesticide_store">
       {loading ? (
         <p>Loading installment requests...</p>
+      ) : error ? (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Retry
+          </button>
+        </div>
       ) : requests.length === 0 ? (
         <div className="empty-state">
           <h3>No pending installment requests</h3>
@@ -70,12 +83,28 @@ function InstallmentRequests() {
           {requests.map((request) => (
             <div key={request.id} className="request-card">
               <Card
-                title={request.title}
-                interest={request.interest}
-                description={`Amount: $${request.amount} - ${request.description}`}
+                title={request.title || request.name || "Untitled Pesticide"}
+                interest={request.interest_rate || 0}
+                description={`Price: ${request.price || 0} taka | Installments: ${request.number_of_installments || 0} | Duration: ${request.duration || "Not specified"}`}
               />
               <div className="request-actions">
-                <p className="request-from">From: {request.farmer}</p>
+                <div className="request-info">
+                  <div className="farmer-profile">
+                    <span className="farmer-label">Requested by:</span>
+                    <ProfileButton userId={request.requested_by} name={request.farmer_name || "View Farmer"} />
+                  </div>
+                  {/* <div className="farmer-details">
+                    <p>
+                      <strong>Phone:</strong> {request.farmer_phone || "Not provided"}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {request.farmer_email || "Not provided"}
+                    </p>
+                    <p>
+                      <strong>Address:</strong> {request.farmer_address || "Not provided"}
+                    </p>
+                  </div> */}
+                </div>
                 <div className="request-buttons">
                   <button className="approve-btn" onClick={() => handleApprove(request.id)}>
                     Approve
@@ -105,15 +134,35 @@ function InstallmentRequests() {
         .request-actions {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           background-color: #f5f5f5;
           padding: 1rem;
           border-radius: 0 0 8px 8px;
           margin-top: -1rem;
         }
         
-        .request-from {
+        .request-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        
+        .farmer-profile {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .farmer-label {
           font-weight: bold;
+        }
+        
+        .farmer-details {
+          font-size: 0.875rem;
+        }
+        
+        .farmer-details p {
+          margin: 0.25rem 0;
         }
         
         .request-buttons {
@@ -137,6 +186,40 @@ function InstallmentRequests() {
         .reject-btn {
           background-color: #e74c3c;
           color: white;
+        }
+        
+        .error-message {
+          color: #e74c3c;
+          font-weight: bold;
+          text-align: center;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .retry-button {
+          background-color: #4a7c59;
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+          margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+          .request-actions {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+          
+          .request-buttons {
+            width: 100%;
+            justify-content: space-between;
+          }
         }
       `}</style>
     </PageLayout>

@@ -61,7 +61,7 @@ function InstrumentStatus() {
   }
 
   return (
-    <PageLayout title="Your Instrument Status" backPath="/dashboard/instrument-owner">
+    <PageLayout title="Your Instrument Status" backPath="/dashboard/instrument_owner">
       {loading ? (
         <p>Loading instruments status...</p>
       ) : error ? (

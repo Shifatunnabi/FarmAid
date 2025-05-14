@@ -186,6 +186,68 @@ router.get("/instrument-rentals/:farmerId", async (req, res) => {
   }
 })
 
+// NEW ENDPOINTS FOR COMPREHENSIVE RENTALS PAGE
+
+// Get farmer's land rentals
+router.get("/land-rentals/:farmerId", async (req, res) => {
+  try {
+    const { farmerId } = req.params
+
+    const [rentals] = await db.query(
+      `SELECT l.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email 
+       FROM lands l 
+       JOIN users u ON l.owner_id = u.id 
+       WHERE l.requested_by = ?`,
+      [farmerId],
+    )
+
+    res.json(rentals)
+  } catch (error) {
+    console.error("Error fetching land rentals:", error)
+    res.status(500).json({ message: "Server error while fetching land rentals" })
+  }
+})
+
+// Get farmer's loan rentals
+router.get("/loan-rentals/:farmerId", async (req, res) => {
+  try {
+    const { farmerId } = req.params
+
+    const [loans] = await db.query(
+      `SELECT l.*, u.name as bank_name, u.phone as bank_phone, u.email as bank_email 
+       FROM loans l 
+       JOIN users u ON l.bank_id = u.id 
+       WHERE l.requested_by = ?`,
+      [farmerId],
+    )
+
+    res.json(loans)
+  } catch (error) {
+    console.error("Error fetching loan rentals:", error)
+    res.status(500).json({ message: "Server error while fetching loan rentals" })
+  }
+})
+
+// Get farmer's pesticide rentals
+router.get("/pesticide-rentals/:farmerId", async (req, res) => {
+  try {
+    const { farmerId } = req.params
+
+    const [pesticides] = await db.query(
+      `SELECT p.*, u.name as store_name, u.phone as store_phone, u.email as store_email 
+       FROM pesticides p 
+       JOIN users u ON p.store_id = u.id 
+       WHERE p.requested_by = ?`,
+      [farmerId],
+    )
+
+    res.json(pesticides)
+  } catch (error) {
+    console.error("Error fetching pesticide rentals:", error)
+    res.status(500).json({ message: "Server error while fetching pesticide rentals" })
+  }
+})
+
 // Create a shared project
 router.post("/shared-project", async (req, res) => {
   try {
@@ -244,6 +306,81 @@ router.post("/invite-to-project", async (req, res) => {
   } catch (error) {
     console.error("Error sending invitations:", error)
     res.status(500).json({ message: "Server error while sending invitations" })
+  }
+})
+
+// Get farmer's projects
+router.get("/projects/:farmerId", async (req, res) => {
+  try {
+    const { farmerId } = req.params
+
+    // Get projects created by the farmer
+    const [createdProjects] = await db.query(
+      `SELECT sp.*, u.name as creator_name
+       FROM shared_projects sp
+       JOIN users u ON sp.creator_id = u.id
+       WHERE sp.creator_id = ?`,
+      [farmerId],
+    )
+
+    // Get projects the farmer has joined (accepted invitations)
+    const [joinedProjects] = await db.query(
+      `SELECT sp.*, u.name as creator_name, spi.id as invitation_id
+       FROM shared_projects sp
+       JOIN shared_project_invites spi ON sp.id = spi.project_id
+       JOIN users u ON sp.creator_id = u.id
+       WHERE spi.invited_farmer_id = ? AND spi.status = 'accepted'`,
+      [farmerId],
+    )
+
+    // Combine both sets of projects
+    const allProjects = [...createdProjects, ...joinedProjects]
+
+    res.json(allProjects)
+  } catch (error) {
+    console.error("Error fetching farmer projects:", error)
+    res.status(500).json({ message: "Server error while fetching farmer projects" })
+  }
+})
+
+// Get project invitations for a farmer
+router.get("/project-invitations/:farmerId", async (req, res) => {
+  try {
+    const { farmerId } = req.params
+
+    const [invitations] = await db.query(
+      `SELECT spi.*, sp.title as project_title, sp.description as project_description, 
+              u.name as invitor_name, u.email as invitor_email
+       FROM shared_project_invites spi
+       JOIN shared_projects sp ON spi.project_id = sp.id
+       JOIN users u ON spi.invitor_id = u.id
+       WHERE spi.invited_farmer_id = ? AND spi.status = 'pending'`,
+      [farmerId],
+    )
+
+    res.json(invitations)
+  } catch (error) {
+    console.error("Error fetching project invitations:", error)
+    res.status(500).json({ message: "Server error while fetching project invitations" })
+  }
+})
+
+// Respond to a project invitation
+router.post("/respond-to-invitation/:invitationId", async (req, res) => {
+  try {
+    const { invitationId } = req.params
+    const { response } = req.body
+
+    if (response !== "accepted" && response !== "rejected") {
+      return res.status(400).json({ message: "Invalid response. Must be 'accepted' or 'rejected'" })
+    }
+
+    await db.query("UPDATE shared_project_invites SET status = ? WHERE id = ?", [response, invitationId])
+
+    res.json({ message: `Invitation ${response} successfully` })
+  } catch (error) {
+    console.error("Error responding to invitation:", error)
+    res.status(500).json({ message: "Server error while responding to invitation" })
   }
 })
 

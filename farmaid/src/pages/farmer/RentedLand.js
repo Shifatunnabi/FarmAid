@@ -5,6 +5,7 @@ import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
 import { farmerApi } from "../../utils/api"
 import { useAuth } from "../../context/AuthContext"
+import ProfileButton from "../../components/ProfileButton"
 
 function RentedLand() {
   const [lands, setLands] = useState([])
@@ -47,10 +48,12 @@ function RentedLand() {
     }
   }
 
-  const showContactInfo = (land) => {
-    alert(
-      `Owner: ${land.owner_name || "Not available"}\nPhone: ${land.owner_phone || "Not available"}\nEmail: ${land.owner_email || "Not available"}`,
-    )
+  const showOwnerProfile = (land) => {
+    if (!land.owner_id) {
+      alert("Owner information not available")
+      return
+    }
+    // The ProfileButton component will handle navigation
   }
 
   return (
@@ -98,9 +101,7 @@ function RentedLand() {
                     {land.status || "unknown"}
                   </span>
                 </div>
-                <button className="contact-btn" onClick={() => showContactInfo(land)}>
-                  Contact Info
-                </button>
+                <ProfileButton userId={land.owner_id} name={land.owner_name || "View Owner"} />
               </div>
             </div>
           ))}

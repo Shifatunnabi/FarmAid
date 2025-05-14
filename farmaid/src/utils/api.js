@@ -49,6 +49,11 @@ export const authApi = {
     }),
 }
 
+// User API calls
+export const userApi = {
+  getUserById: (userId) => fetchApi(`/users/${userId}`),
+}
+
 // Farmer API calls
 export const farmerApi = {
   getAvailableLands: () => fetchApi("/farmer/lands"),
@@ -85,6 +90,14 @@ export const farmerApi = {
 
   getInstrumentRentals: (farmerId) => fetchApi(`/farmer/instrument-rentals/${farmerId}`),
 
+  // New endpoints for the comprehensive rentals page
+  getFarmerLands: (farmerId) => fetchApi(`/farmer/land-rentals/${farmerId}`),
+
+  getFarmerLoans: (farmerId) => fetchApi(`/farmer/loan-rentals/${farmerId}`),
+
+  getFarmerPesticides: (farmerId) => fetchApi(`/farmer/pesticide-rentals/${farmerId}`),
+
+  // Shared project endpoints
   createSharedProject: (projectData) =>
     fetchApi("/farmer/shared-project", {
       method: "POST",
@@ -97,6 +110,16 @@ export const farmerApi = {
     fetchApi("/farmer/invite-to-project", {
       method: "POST",
       body: JSON.stringify(inviteData),
+    }),
+
+  getFarmerProjects: (farmerId) => fetchApi(`/farmer/projects/${farmerId}`),
+
+  getProjectInvitations: (farmerId) => fetchApi(`/farmer/project-invitations/${farmerId}`),
+
+  respondToProjectInvitation: (invitationId, response) =>
+    fetchApi(`/farmer/respond-to-invitation/${invitationId}`, {
+      method: "POST",
+      body: JSON.stringify({ response }),
     }),
 }
 
@@ -149,6 +172,7 @@ export const bankApi = {
       method: "POST",
     }),
 }
+
 
 // Store API calls
 export const storeApi = {

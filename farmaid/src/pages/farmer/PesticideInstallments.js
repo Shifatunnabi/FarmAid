@@ -5,6 +5,7 @@ import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
 import { farmerApi } from "../../utils/api"
 import { useAuth } from "../../context/AuthContext"
+import ProfileButton from "../../components/ProfileButton"
 
 function PesticideInstallments() {
   const [pesticides, setPesticides] = useState([])
@@ -44,10 +45,6 @@ function PesticideInstallments() {
     }
   }
 
-  const showContactInfo = (pesticide) => {
-    alert(`Store: ${pesticide.store_name}\nPhone: ${pesticide.store_phone}\nEmail: ${pesticide.store_email}`)
-  }
-
   return (
     <PageLayout title="Pesticide Installment Plans" backPath="/dashboard/farmer">
       {loading ? (
@@ -61,9 +58,9 @@ function PesticideInstallments() {
           {pesticides.map((pesticide) => (
             <div key={pesticide.id} className="pesticide-card">
               <Card
-                title={pesticide.name}
+                title={pesticide.title || pesticide.name || "Untitled Pesticide"}
                 interest={pesticide.interest_rate}
-                description={`Price: $${pesticide.price} | Installments: ${pesticide.number_of_installments} | Duration: ${pesticide.duration}`}
+                description={`Price: ${pesticide.price} taka | Installments: ${pesticide.number_of_installments} | Duration: ${pesticide.duration}`}
                 buttonText={
                   pesticide.status === "available"
                     ? "Apply for Plan"
@@ -86,12 +83,10 @@ function PesticideInstallments() {
                           : "status-sold"
                     }`}
                   >
-                    {pesticide.status}
+                    {pesticide.status || "available"}
                   </span>
                 </div>
-                <button className="contact-btn" onClick={() => showContactInfo(pesticide)}>
-                  Contact Info
-                </button>
+                <ProfileButton userId={pesticide.store_id} name={pesticide.store_name || "View Store"} />
               </div>
             </div>
           ))}
@@ -143,20 +138,6 @@ function PesticideInstallments() {
         .status-sold {
           background-color: #3498db;
           color: white;
-        }
-        
-        .contact-btn {
-          background-color: #4a7c59;
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: bold;
-        }
-        
-        .contact-btn:hover {
-          background-color: #3d6649;
         }
         
         .error-message {

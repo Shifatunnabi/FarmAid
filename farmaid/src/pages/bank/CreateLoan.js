@@ -1,4 +1,4 @@
-"use client"
+
 import { useState } from "react"
 import PageLayout from "../../components/PageLayout"
 import Form from "../../components/Form"
@@ -19,7 +19,7 @@ function CreateLoan() {
     },
     {
       name: "amount",
-      label: "Maximum Loan Amount",
+      label: "Maximum Loan Amount (in taka)",
       type: "number",
       placeholder: "Enter amount",
       required: true,

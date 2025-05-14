@@ -5,6 +5,7 @@ import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
 import { landownerApi } from "../../utils/api"
 import { useAuth } from "../../context/AuthContext"
+import ProfileButton from "../../components/ProfileButton"
 
 function LandRequests() {
   const [requests, setRequests] = useState([])
@@ -89,11 +90,10 @@ function LandRequests() {
               />
               <div className="request-actions">
                 <div className="request-info">
-                  <p className="request-from">From: {request.farmer_name || "Unknown Farmer"}</p>
-                  <p className="request-details">
-                    Contact: {request.farmer_phone || "N/A"} | {request.farmer_email || "N/A"}
-                  </p>
-                  <p className="request-address">Address: {request.farmer_address || "Not provided"}</p>
+                  <div className="farmer-profile">
+                    <span className="farmer-label">Requested by:</span>
+                    <ProfileButton userId={request.requested_by} name={request.farmer_name || "View Farmer"} />
+                  </div>
                 </div>
                 <div className="request-buttons">
                   <button className="approve-btn" onClick={() => handleApprove(request.id)}>
@@ -135,6 +135,16 @@ function LandRequests() {
           display: flex;
           flex-direction: column;
           gap: 0.25rem;
+        }
+
+        .farmer-profile {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .farmer-label {
+          font-weight: bold;
         }
         
         .request-from {

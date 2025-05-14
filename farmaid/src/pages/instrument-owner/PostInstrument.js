@@ -100,7 +100,7 @@ function PostInstrument() {
   }
 
   return (
-    <PageLayout title="Post Agricultural Instrument" backPath="/dashboard/instrument-owner">
+    <PageLayout title="Post Agricultural Instrument" backPath="/dashboard/instrument_owner">
       {error && <div className="error-message">{error}</div>}
       <Form
         title="Instrument Listing"

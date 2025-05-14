@@ -3,56 +3,36 @@
 import { useState, useEffect } from "react"
 import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
+import ProfileButton from "../../components/ProfileButton"
+import { storeApi } from "../../utils/api"
+import { useAuth } from "../../context/AuthContext"
 
 function InstallmentStatus() {
   const [installments, setInstallments] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { user } = useAuth()
 
   useEffect(() => {
-    // In a real app, you would fetch data from an API
-    // For this example, we'll use mock data
-    setTimeout(() => {
-      setInstallments([
-        {
-          id: 1,
-          title: "Organic Pesticide Package",
-          interest: 3,
-          description: "Eco-friendly pesticides suitable for organic farming. Includes application equipment.",
-          status: "Active",
-          applications: 8,
-        },
-        {
-          id: 2,
-          title: "Complete Pest Control Kit",
-          interest: 4.5,
-          description: "Comprehensive pest control solution for multiple crops. Includes herbicides and fungicides.",
-          status: "Active",
-          applications: 12,
-        },
-        {
-          id: 3,
-          title: "Season-Long Protection Plan",
-          interest: 5,
-          description: "Full season protection with scheduled applications and consultations.",
-          status: "Paused",
-          applications: 3,
-        },
-        {
-          id: 4,
-          title: "Specialized Fruit Tree Treatment",
-          interest: 3.5,
-          description: "Targeted pesticides for fruit orchards with minimal environmental impact.",
-          status: "Active",
-          applications: 10,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
-  }, [])
+    const fetchInstallments = async () => {
+      try {
+        console.log(`Fetching sold pesticides for store ID: ${user.id}`)
+        const soldPesticides = await storeApi.getSoldPesticides(user.id)
+        console.log("Sold pesticides data received:", soldPesticides)
+        setInstallments(soldPesticides)
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching sold pesticides:", err)
+        setError("Failed to load sold pesticides. Please try again later.")
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const handleViewDetails = (id) => {
-    alert(`Viewing details for installment plan #${id}. In a real app, this would open a detailed view.`)
-  }
+    if (user && user.id) {
+      fetchInstallments()
+    }
+  }, [user])
 
   const handleToggleStatus = (id, currentStatus) => {
     const newStatus = currentStatus === "Active" ? "Paused" : "Active"
@@ -65,30 +45,43 @@ function InstallmentStatus() {
   }
 
   return (
-    <PageLayout title="Installment Plans Status" backPath="/dashboard/store">
+    <PageLayout title="Installment Plans Status" backPath="/dashboard/pesticide_store">
       {loading ? (
         <p>Loading installment plans...</p>
+      ) : error ? (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Retry
+          </button>
+        </div>
+      ) : installments.length === 0 ? (
+        <div className="empty-state">
+          <h3>No sold pesticide installment plans found</h3>
+          <p>When farmers purchase your pesticide installment plans, they will appear here.</p>
+        </div>
       ) : (
         <div className="installments-container">
           {installments.map((installment) => (
             <div key={installment.id} className="installment-card">
               <Card
-                title={installment.title}
-                interest={installment.interest}
-                description={installment.description}
-                buttonText="View Details"
-                onButtonClick={() => handleViewDetails(installment.id)}
+                title={installment.title || installment.name || "Untitled Pesticide"}
+                interest={installment.interest_rate || 0}
+                description={`Price: ${installment.price || 0} taka | Installments: ${installment.number_of_installments || 0} | Duration: ${installment.duration || "Not specified"}`}
               />
               <div className="installment-footer">
                 <div className="installment-stats">
-                  <span className={`installment-status ${installment.status.toLowerCase()}`}>{installment.status}</span>
-                  <span className="installment-applications">{installment.applications} Applications</span>
+                  <span className={`installment-status sold`}>Sold</span>
+                  <div className="buyer-info">
+                    <span className="buyer-label">Buyer:</span>
+                    <ProfileButton userId={installment.requested_by} name={installment.buyer_name || "View Buyer"} />
+                  </div>
                 </div>
                 <button
-                  className={`toggle-status-btn ${installment.status === "Active" ? "pause" : "activate"}`}
-                  onClick={() => handleToggleStatus(installment.id, installment.status)}
+                  className={`toggle-status-btn ${installment.active_status === "Active" ? "pause" : "activate"}`}
+                  onClick={() => handleToggleStatus(installment.id, installment.active_status || "Active")}
                 >
-                  {installment.status === "Active" ? "Pause Plan" : "Activate Plan"}
+                  {installment.active_status === "Active" ? "Pause Plan" : "Activate Plan"}
                 </button>
               </div>
             </div>
@@ -110,7 +103,7 @@ function InstallmentStatus() {
         .installment-footer {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           background-color: #f5f5f5;
           padding: 1rem;
           border-radius: 0 0 8px 8px;
@@ -120,7 +113,7 @@ function InstallmentStatus() {
         .installment-stats {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
         
         .installment-status {
@@ -141,7 +134,18 @@ function InstallmentStatus() {
           color: #333;
         }
         
-        .installment-applications {
+        .installment-status.sold {
+          background-color: #3498db;
+          color: white;
+        }
+        
+        .buyer-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .buyer-label {
           font-size: 0.875rem;
           color: #666;
         }
@@ -162,6 +166,35 @@ function InstallmentStatus() {
         .toggle-status-btn.activate {
           background-color: #4a7c59;
           color: white;
+        }
+        
+        .error-message {
+          color: #e74c3c;
+          font-weight: bold;
+          text-align: center;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .retry-button {
+          background-color: #4a7c59;
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+          margin-top: 1rem;
+        }
+        
+        .empty-state {
+          text-align: center;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         @media (max-width: 768px) {

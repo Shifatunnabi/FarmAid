@@ -7,6 +7,9 @@ import LandingPage from "./pages/LandingPage"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 
+// Profile Page
+import Profile from "./pages/Profile"
+
 // Dashboards
 import FarmerDashboard from "./pages/dashboards/FarmerDashboard"
 import LandownerDashboard from "./pages/dashboards/LandownerDashboard"
@@ -20,7 +23,7 @@ import BankLoans from "./pages/farmer/BankLoans"
 import PesticideInstallments from "./pages/farmer/PesticideInstallments"
 import SharedProject from "./pages/farmer/SharedProject"
 import RentInstruments from "./pages/farmer/RentInstruments"
-import InstrumentRentals from "./pages/farmer/InstrumentRentals"
+import RentalsAndPlans from "./pages/farmer/RentalsAndPlans"
 
 // Landowner Pages
 import RentLand from "./pages/landowner/RentLand"
@@ -47,8 +50,6 @@ import { AuthProvider } from "./context/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 function App() {
-  // Helper function to map database roles to route roles
-
   return (
     <AuthProvider>
       <Router>
@@ -58,6 +59,16 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+            {/* Profile Route */}
+            <Route
+              path="/profile/:id"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Protected Routes - Farmer */}
             <Route
@@ -109,10 +120,10 @@ function App() {
               }
             />
             <Route
-              path="/farmer/instruments/status"
+              path="/farmer/rentals-and-plans"
               element={
                 <ProtectedRoute allowedRole="farmer">
-                  <InstrumentRentals />
+                  <RentalsAndPlans />
                 </ProtectedRoute>
               }
             />

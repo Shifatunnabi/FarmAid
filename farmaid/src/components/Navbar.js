@@ -1,4 +1,4 @@
-"use client"
+
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import "./Navbar.css"
@@ -21,9 +21,11 @@ function Navbar() {
       </div>
       {user && (
         <div className="navbar-menu">
-          <span className="welcome-text">
-            Welcome, {user.name} ({user.role})
-          </span>
+          <Link to={`/profile/${user.id}`} className="profile-link" title={`${user.name} (${user.role})`}>
+            <div className="profile-icon">
+              <span>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
+            </div>
+          </Link>
           <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>

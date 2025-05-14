@@ -85,19 +85,19 @@ function LandingPage() {
           <div className="developer-info">
             <h3>Developer Contact</h3>
             <p>
-              <strong>Name:</strong> Your Name
+              <strong>Name:</strong> Shifatunnabi Shifat
             </p>
             <p>
-              <strong>Email:</strong> your.email@example.com
+              <strong>Email:</strong> shifatunnabishifat@gmail.com
             </p>
             <p>
-              <strong>Phone:</strong> +1 (123) 456-7890
+              <strong>Phone:</strong> +880 1885890605
             </p>
             <div className="social-links">
-              <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/Shifatunnabi" target="_blank" rel="noopener noreferrer">
                 GitHub
               </a>
-              <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.linkedin.com/in/shifatunnabi-shifat/" target="_blank" rel="noopener noreferrer">
                 LinkedIn
               </a>
             </div>

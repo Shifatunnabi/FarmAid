@@ -1,93 +1,107 @@
-"use client"
 
 import { useState, useEffect } from "react"
 import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
+import ProfileButton from "../../components/ProfileButton"
+import { bankApi } from "../../utils/api"
+import { useAuth } from "../../context/AuthContext"
 
 function LoanStatus() {
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { user } = useAuth()
 
   useEffect(() => {
-    // In a real app, you would fetch data from an API
-    // For this example, we'll use mock data
-    setTimeout(() => {
-      setLoans([
-        {
-          id: 1,
-          title: "Agricultural Equipment Loan",
-          interest: 5.5,
-          description: "Loan for purchasing tractors and harvesters. Maximum amount $10,000.",
-          status: "Active",
-          applications: 12,
-        },
-        {
-          id: 2,
-          title: "Seed Investment Loan",
-          interest: 4,
-          description: "Low-interest loan for purchasing high-quality seeds. Maximum amount $5,000.",
-          status: "Active",
-          applications: 8,
-        },
-        {
-          id: 3,
-          title: "Irrigation System Loan",
-          interest: 6,
-          description: "Financing for modern irrigation systems. Maximum amount $15,000.",
-          status: "Active",
-          applications: 5,
-        },
-        {
-          id: 4,
-          title: "Farm Expansion Loan",
-          interest: 7.5,
-          description: "Support for expanding farm operations. Maximum amount $25,000.",
-          status: "Paused",
-          applications: 3,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
-  }, [])
+    const fetchLoans = async () => {
+      try {
+        console.log(`Fetching loans for bank ID: ${user.id}`)
+        const loansData = await bankApi.getLoans(user.id)
+        console.log("Loans data received:", loansData)
+        setLoans(loansData)
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching loans:", err)
+        setError("Failed to load loans. Please try again later.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (user && user.id) {
+      fetchLoans()
+    }
+  }, [user])
 
   const handleViewDetails = (id) => {
     alert(`Viewing details for loan #${id}. In a real app, this would open a detailed view.`)
   }
 
-  const handleToggleStatus = (id, currentStatus) => {
-    const newStatus = currentStatus === "Active" ? "Paused" : "Active"
-    alert(`Loan #${id} status changed to ${newStatus}. In a real app, this would update the database.`)
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      const newStatus = currentStatus === "available" ? "paused" : "available"
+      console.log(`Changing loan #${id} status to ${newStatus}`)
 
-    // Update the local state to reflect the change
-    setLoans(loans.map((loan) => (loan.id === id ? { ...loan, status: newStatus } : loan)))
+      // In a real implementation, you would have an API endpoint for this
+      // For now, just update the UI
+      setLoans(
+        loans.map((loan) => (loan.id === id && loan.status !== "booked" ? { ...loan, status: newStatus } : loan)),
+      )
+
+      alert(`Loan #${id} status changed to ${newStatus}.`)
+    } catch (error) {
+      console.error("Error toggling loan status:", error)
+      alert(`Failed to update loan status: ${error.message || "Unknown error"}`)
+    }
   }
 
   return (
     <PageLayout title="Loan Status and Management" backPath="/dashboard/bank">
       {loading ? (
         <p>Loading loans...</p>
+      ) : error ? (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Retry
+          </button>
+        </div>
+      ) : loans.length === 0 ? (
+        <div className="empty-state">
+          <h3>You haven't created any loans yet</h3>
+          <p>Create a new loan using the "Create New Loan" option.</p>
+        </div>
       ) : (
         <div className="loans-container">
           {loans.map((loan) => (
             <div key={loan.id} className="loan-card">
               <Card
-                title={loan.title}
-                interest={loan.interest}
-                description={loan.description}
-                buttonText="View Details"
+                title={loan.title || `Loan #${loan.id}`}
+                interest={loan.interest_rate || 0}
+                description={`Amount: ${loan.amount || "N/A"} taka | Duration: ${loan.duration || "N/A"}`}
+                buttonText=""
                 onButtonClick={() => handleViewDetails(loan.id)}
               />
               <div className="loan-footer">
                 <div className="loan-stats">
-                  <span className={`loan-status ${loan.status.toLowerCase()}`}>{loan.status}</span>
-                  <span className="loan-applications">{loan.applications} Applications</span>
+                  <span className={`loan-status ${loan.status || "available"}`}>
+                    {loan.status ? loan.status.charAt(0).toUpperCase() + loan.status.slice(1) : "Available"}
+                  </span>
+                  {loan.requested_by && (
+                    <div className="borrower-info">
+                      <span className="borrower-label">Requested by:</span>
+                      <ProfileButton userId={loan.requested_by} name="View Farmer" />
+                    </div>
+                  )}
                 </div>
-                <button
-                  className={`toggle-status-btn ${loan.status === "Active" ? "pause" : "activate"}`}
-                  onClick={() => handleToggleStatus(loan.id, loan.status)}
-                >
-                  {loan.status === "Active" ? "Pause Loan" : "Activate Loan"}
-                </button>
+                {loan.status !== "booked" && (
+                  <button
+                    className={`toggle-status-btn ${loan.status === "available" ? "pause" : "activate"}`}
+                    onClick={() => handleToggleStatus(loan.id, loan.status || "available")}
+                  >
+                    {loan.status === "available" ? "Pause Loan" : "Activate Loan"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -108,7 +122,7 @@ function LoanStatus() {
         .loan-footer {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           background-color: #f5f5f5;
           padding: 1rem;
           border-radius: 0 0 8px 8px;
@@ -118,7 +132,7 @@ function LoanStatus() {
         .loan-stats {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
         
         .loan-status {
@@ -129,7 +143,7 @@ function LoanStatus() {
           font-size: 0.875rem;
         }
         
-        .loan-status.active {
+        .loan-status.available {
           background-color: #4a7c59;
           color: white;
         }
@@ -139,7 +153,23 @@ function LoanStatus() {
           color: #333;
         }
         
-        .loan-applications {
+        .loan-status.booked {
+          background-color: #3498db;
+          color: white;
+        }
+        
+        .loan-status.pending {
+          background-color: #f39c12;
+          color: white;
+        }
+        
+        .borrower-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .borrower-label {
           font-size: 0.875rem;
           color: #666;
         }
@@ -162,9 +192,43 @@ function LoanStatus() {
           color: white;
         }
         
+        .error-message {
+          color: #e74c3c;
+          font-weight: bold;
+          text-align: center;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .retry-button {
+          background-color: #4a7c59;
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+          margin-top: 1rem;
+        }
+        
+        .empty-state {
+          text-align: center;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
         @media (max-width: 768px) {
           .loans-container {
             grid-template-columns: 1fr;
+          }
+          
+          .loan-footer {
+            flex-direction: column;
+            gap: 1rem;
           }
         }
       `}</style>

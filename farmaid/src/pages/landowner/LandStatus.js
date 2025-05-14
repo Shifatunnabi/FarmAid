@@ -80,7 +80,7 @@ function LandStatus() {
                 title={land.title || "Untitled Land"}
                 interest={land.interest_rate || 0}
                 description={`Location: ${land.location || "Not specified"} | Size: ${land.size || "Not specified"}`}
-                buttonText="View Details"
+                buttonText=""
                 onButtonClick={() => handleViewDetails(land.id)}
               />
               <div className="land-footer">

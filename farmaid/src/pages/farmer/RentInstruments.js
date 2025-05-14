@@ -5,6 +5,7 @@ import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
 import { farmerApi } from "../../utils/api"
 import { useAuth } from "../../context/AuthContext"
+import ProfileButton from "../../components/ProfileButton"
 
 function RentInstruments() {
   const [instruments, setInstruments] = useState([])
@@ -50,10 +51,12 @@ function RentInstruments() {
     }
   }
 
-  const showContactInfo = (instrument) => {
-    alert(
-      `Owner: ${instrument.owner_name || "Not available"}\nPhone: ${instrument.owner_phone || "Not available"}\nEmail: ${instrument.owner_email || "Not available"}`,
-    )
+  const showOwnerProfile = (instrument) => {
+    if (!instrument.owner_id) {
+      alert("Owner information not available")
+      return
+    }
+    // The ProfileButton component will handle navigation
   }
 
   return (
@@ -105,9 +108,7 @@ function RentInstruments() {
                     {instrument.status || "unknown"}
                   </span>
                 </div>
-                <button className="contact-btn" onClick={() => showContactInfo(instrument)}>
-                  Contact Info
-                </button>
+                <ProfileButton userId={instrument.owner_id} name={instrument.owner_name || "View Owner"} />
               </div>
             </div>
           ))}

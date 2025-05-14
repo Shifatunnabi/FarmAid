@@ -1,0 +1,27 @@
+.profile-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #4a7c59;
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.profile-button:hover {
+  background-color: #3d6649;
+}
+
+.profile-button-icon {
+  margin-right: 0.5rem;
+}
+
+.profile-button-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}

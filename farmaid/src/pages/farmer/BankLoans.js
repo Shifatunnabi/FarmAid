@@ -5,6 +5,7 @@ import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
 import { farmerApi } from "../../utils/api"
 import { useAuth } from "../../context/AuthContext"
+import ProfileButton from "../../components/ProfileButton"
 
 function BankLoans() {
   const [loans, setLoans] = useState([])
@@ -40,10 +41,6 @@ function BankLoans() {
     }
   }
 
-  const showContactInfo = (loan) => {
-    alert(`Bank: ${loan.bank_name}\nPhone: ${loan.bank_phone}\nEmail: ${loan.bank_email}`)
-  }
-
   return (
     <PageLayout title="Available Bank Loans" backPath="/dashboard/farmer">
       {loading ? (
@@ -59,7 +56,7 @@ function BankLoans() {
               <Card
                 title={`${loan.title} - ${loan.bank_name}`}
                 interest={loan.interest_rate}
-                description={`Amount: $${loan.amount} | Duration: ${loan.duration}`}
+                description={`Amount: ${loan.amount} taka | Duration: ${loan.duration}`}
                 buttonText={
                   loan.status === "available" ? "Apply for Loan" : loan.status === "pending" ? "Pending" : "Approved"
                 }
@@ -81,9 +78,7 @@ function BankLoans() {
                     {loan.status}
                   </span>
                 </div>
-                <button className="contact-btn" onClick={() => showContactInfo(loan)}>
-                  Contact Info
-                </button>
+                <ProfileButton userId={loan.bank_id} name={loan.bank_name || "View Bank"} />
               </div>
             </div>
           ))}

@@ -23,8 +23,27 @@
   gap: 1rem;
 }
 
-.welcome-text {
-  font-weight: 500;
+.profile-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+}
+
+.profile-icon {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.profile-icon:hover {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .logout-btn {

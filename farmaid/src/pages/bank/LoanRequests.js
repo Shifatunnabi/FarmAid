@@ -3,61 +3,76 @@
 import { useState, useEffect } from "react"
 import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
+import ProfileButton from "../../components/ProfileButton"
+import { bankApi } from "../../utils/api"
+import { useAuth } from "../../context/AuthContext"
 
 function LoanRequests() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { user } = useAuth()
 
   useEffect(() => {
-    // In a real app, you would fetch data from an API
-    // For this example, we'll use mock data
-    setTimeout(() => {
-      setRequests([
-        {
-          id: 1,
-          title: "Seed Purchase Loan",
-          interest: 5,
-          description: "I need a loan to purchase high-quality seeds for my wheat farm. Planning to cultivate 5 acres.",
-          farmer: "James Wilson",
-          amount: 2500,
-        },
-        {
-          id: 2,
-          title: "Irrigation Equipment Loan",
-          interest: 4.5,
-          description: "Requesting funds to install a drip irrigation system for my vegetable farm.",
-          farmer: "Sarah Thompson",
-          amount: 5000,
-        },
-        {
-          id: 3,
-          title: "Tractor Repair Loan",
-          interest: 6,
-          description: "My tractor needs urgent repairs before the harvest season. Need funds to fix it.",
-          farmer: "Michael Brown",
-          amount: 3500,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
-  }, [])
+    const fetchRequests = async () => {
+      try {
+        console.log(`Fetching loan requests for bank ID: ${user.id}`)
+        const requestsData = await bankApi.getLoanRequests(user.id)
+        console.log("Loan requests data received:", requestsData)
+        setRequests(requestsData)
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching loan requests:", err)
+        setError("Failed to load loan requests. Please try again later.")
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const handleApprove = (id) => {
-    alert(`Loan request #${id} has been approved. In a real app, this would update the database.`)
-    // In a real app, you would update the database and refresh the list
-    setRequests(requests.filter((request) => request.id !== id))
+    if (user && user.id) {
+      fetchRequests()
+    }
+  }, [user])
+
+  const handleApprove = async (id) => {
+    try {
+      console.log(`Approving loan request #${id}`)
+      await bankApi.acceptLoanRequest(id)
+
+      // Remove the approved request from the list
+      setRequests(requests.filter((request) => request.id !== id))
+      alert("Loan request approved successfully!")
+    } catch (error) {
+      console.error("Error approving loan request:", error)
+      alert(`Failed to approve request: ${error.message || "Unknown error"}`)
+    }
   }
 
-  const handleReject = (id) => {
-    alert(`Loan request #${id} has been rejected. In a real app, this would update the database.`)
-    // In a real app, you would update the database and refresh the list
-    setRequests(requests.filter((request) => request.id !== id))
+  const handleReject = async (id) => {
+    try {
+      console.log(`Rejecting loan request #${id}`)
+      await bankApi.rejectLoanRequest(id)
+
+      // Remove the rejected request from the list
+      setRequests(requests.filter((request) => request.id !== id))
+      alert("Loan request rejected successfully.")
+    } catch (error) {
+      console.error("Error rejecting loan request:", error)
+      alert(`Failed to reject request: ${error.message || "Unknown error"}`)
+    }
   }
 
   return (
     <PageLayout title="Loan Requests from Farmers" backPath="/dashboard/bank">
       {loading ? (
         <p>Loading loan requests...</p>
+      ) : error ? (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Retry
+          </button>
+        </div>
       ) : requests.length === 0 ? (
         <div className="empty-state">
           <h3>No pending loan requests</h3>
@@ -68,12 +83,17 @@ function LoanRequests() {
           {requests.map((request) => (
             <div key={request.id} className="request-card">
               <Card
-                title={request.title}
-                interest={request.interest}
-                description={`Amount: $${request.amount} - ${request.description}`}
+                title={request.title || `Loan #${request.id}`}
+                interest={request.interest_rate || 0}
+                description={`Amount: $${request.amount || "N/A"} | Duration: ${request.duration || "N/A"}`}
               />
               <div className="request-actions">
-                <p className="request-from">From: {request.farmer}</p>
+                <div className="request-info">
+                  <div className="farmer-profile">
+                    <span className="farmer-label">Requested by:</span>
+                    <ProfileButton userId={request.requested_by} name={request.farmer_name || "View Farmer"} />
+                  </div>
+                </div>
                 <div className="request-buttons">
                   <button className="approve-btn" onClick={() => handleApprove(request.id)}>
                     Approve
@@ -110,8 +130,21 @@ function LoanRequests() {
           margin-top: -1rem;
         }
         
-        .request-from {
-          font-weight: bold;
+        .request-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        
+        .farmer-profile {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .farmer-label {
+          font-size: 0.875rem;
+          color: #666;
         }
         
         .request-buttons {
@@ -135,6 +168,40 @@ function LoanRequests() {
         .reject-btn {
           background-color: #e74c3c;
           color: white;
+        }
+        
+        .error-message {
+          color: #e74c3c;
+          font-weight: bold;
+          text-align: center;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .retry-button {
+          background-color: #4a7c59;
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+          margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+          .request-actions {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+          
+          .request-buttons {
+            width: 100%;
+            justify-content: space-between;
+          }
         }
       `}</style>
     </PageLayout>

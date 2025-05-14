@@ -26,7 +26,7 @@ function CreateInstallment() {
     },
     {
       name: "price",
-      label: "Total Price",
+      label: "Total Price (in taka)",
       type: "number",
       placeholder: "Enter price",
       required: true,
@@ -92,7 +92,7 @@ function CreateInstallment() {
   }
 
   return (
-    <PageLayout title="Create an Installment Plan" backPath="/dashboard/store">
+    <PageLayout title="Create an Installment Plan" backPath="/dashboard/pesticide_store">
       <Form
         title="New Installment Plan"
         fields={fields}

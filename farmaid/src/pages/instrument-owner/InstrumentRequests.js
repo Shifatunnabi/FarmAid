@@ -1,10 +1,10 @@
-"use client"
 
 import { useState, useEffect } from "react"
 import PageLayout from "../../components/PageLayout"
 import Card from "../../components/Card"
 import { instrumentApi } from "../../utils/api"
 import { useAuth } from "../../context/AuthContext"
+import ProfileButton from "../../components/ProfileButton"
 
 function InstrumentRequests() {
   const [requests, setRequests] = useState([])
@@ -63,7 +63,7 @@ function InstrumentRequests() {
   }
 
   return (
-    <PageLayout title="Instrument Rental Requests" backPath="/dashboard/instrument-owner">
+    <PageLayout title="Instrument Rental Requests" backPath="/dashboard/instrument_owner">
       {loading ? (
         <p>Loading instrument requests...</p>
       ) : error ? (
@@ -89,11 +89,10 @@ function InstrumentRequests() {
               />
               <div className="request-actions">
                 <div className="request-info">
-                  <p className="request-from">From: {request.farmer_name || "Unknown Farmer"}</p>
-                  <p className="request-details">
-                    Contact: {request.farmer_phone || "N/A"} | {request.farmer_email || "N/A"}
-                  </p>
-                  <p className="request-address">Address: {request.farmer_address || "Not provided"}</p>
+                  <div className="farmer-profile">
+                    <span className="farmer-label">Requested by:</span>
+                    <ProfileButton userId={request.requested_by} name={request.farmer_name || "View Farmer"} />
+                  </div>
                 </div>
                 <div className="request-buttons">
                   <button className="approve-btn" onClick={() => handleApprove(request.id)}>

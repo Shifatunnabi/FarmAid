@@ -4,7 +4,7 @@ function BankDashboard() {
   const buttons = [
     {
       text: "Create New Loan",
-      path: "/bank/create-loan",
+      path: "/bank/create-loan", 
     },
     {
       text: "Check List and Status of Loans",

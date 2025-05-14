@@ -2,20 +2,20 @@ const express = require("express")
 const cors = require("cors")
 const db = require("./config/db")
 
-// Import routes
 const authRoutes = require("./routes/auth")
 const farmerRoutes = require("./routes/farmer")
 const landownerRoutes = require("./routes/landowner")
 const bankRoutes = require("./routes/bank")
 const storeRoutes = require("./routes/store")
 const instrumentRoutes = require("./routes/instrument")
+const usersRoutes = require("./routes/users")
 
 const app = express()
 
-// Configure CORS - Use more permissive settings during development
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173", "*"], // Add your frontend URLs
+    origin: ["http://localhost:3000", "http://localhost:5173", "*"], 
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
@@ -30,6 +30,7 @@ app.use("/api/landowner", landownerRoutes)
 app.use("/api/bank", bankRoutes)
 app.use("/api/store", storeRoutes)
 app.use("/api/instrument", instrumentRoutes)
+app.use("/api/users", usersRoutes)
 
 // Test route
 app.get("/", (req, res) => {

@@ -19,8 +19,8 @@ function FarmerDashboard() {
       path: "/farmer/instruments",
     },
     {
-      text: "Your Instrument Rentals",
-      path: "/farmer/instruments/status",
+      text: "Your Rentals and Plans",
+      path: "/farmer/rentals-and-plans",
     },
     {
       text: "Start Shared Project",
