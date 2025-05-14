@@ -3,8 +3,8 @@
 <!-- <p align="center">
   <img src="https://i.imgur.com/JD3Rf5N.png" width="400" alt="FarmAid Logo">
 </p> -->
-Your friendly digital companion for modern farming solutions 
-Bridging the gap between farmers and agricultural resources
+<p>Your friendly digital companion for modern farming solutions </p>
+<p>Bridging the gap between farmers and agricultural resources </p>
 
 ## 🌱 About
 **FarmAid** connects farmers with essential resources:
